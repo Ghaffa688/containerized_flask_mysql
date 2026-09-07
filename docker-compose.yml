@@ -1,0 +1,23 @@
+name: flask-mysql-local
+
+services:
+  database:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: BucketList
+      MYSQL_USER: flask_user
+      MYSQL_PASSWORD: devpassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init:/docker-entrypoint-initdb.d
+
+  application:
+    build: ./app
+    ports:
+      - "5000:5000"
+    depends_on:
+      - database
+
+volumes:
+  mysql_data:
