@@ -2,24 +2,27 @@ name: flask-mysql-local
 
 services:
 
-  adminer: 
+  adminer:
     image: adminer
-    ports: 
+    ports:
       - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
 
   database:
     build:
       context: ./mysql
-      env_file:
+    env_file:
       - .env
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE}
       MYSQL_USER: ${MYSQL_USER}
       MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-    secrets:
-      - db_password
-      - db_root_password
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
@@ -34,14 +37,16 @@ services:
       - no-new-privileges:true
 
   application:
-    build: ./app
+    build:
+      context: ./app
+    env_file:
+      - .env
     environment:
-      DB_HOST: database
-      DB_USER: flask_user
-      DB_NAME: BucketList
-      DB_PASSWORD_FILE: /run/secrets/db_password
-    secrets:
-      - db_password
+      DB_HOST: ${MYSQL_HOST}
+      DB_USER: ${MYSQL_USER}
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      DB_NAME: ${MYSQL_DATABASE}
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
     ports:
       - "5000:5000"
     depends_on:
@@ -55,15 +60,9 @@ services:
 
 networks:
   frontend:
+
   backend:
     internal: true
 
-
 volumes:
   mysql_data:
-
-secrets:
-  db_password:
-    file: ./secrets/db_password.txt
-  db_root_password:
-    file: ./secrets/db_root_password.txt
