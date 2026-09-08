@@ -17,19 +17,6 @@ app.secret_key = os.getenv(
     'FLASK_SECRET_KEY',
     'dev-only-change-me'
 )
-mysql = MySQL()
-app = Flask(__name__)
-
-app.config['MYSQL_DATABASE_HOST'] = os.getenv('DB_HOST', 'database')
-app.config['MYSQL_DATABASE_USER'] = os.getenv('DB_USER', 'flask_user')
-app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv('DB_PASSWORD', 'devpassword')
-app.config['MYSQL_DATABASE_DB'] = os.getenv('DB_NAME', 'BucketList')
-
-mysql.init_app(app)
-
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-only-change-me')
-
-
 
 @app.route('/')
 def main():

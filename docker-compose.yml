@@ -2,17 +2,6 @@ name: flask-mysql-local
 
 services:
 
-  adminer:
-    image: adminer
-    ports:
-      - "8080:8080"
-    depends_on:
-      database:
-        condition: service_healthy
-    networks:
-      - frontend
-      - backend
-
   database:
     build:
       context: ./mysql
@@ -25,10 +14,13 @@ services:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
       - mysql_data:/var/lib/mysql
-    networks:
-      - backend
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      test:
+        - CMD
+        - mysqladmin
+        - ping
+        - -h
+        - "127.0.0.1"
       interval: 5s
       timeout: 5s
       retries: 20
@@ -42,27 +34,29 @@ services:
     env_file:
       - .env
     environment:
-      DB_HOST: ${MYSQL_HOST}
-      DB_USER: ${MYSQL_USER}
-      DB_PASSWORD: ${MYSQL_PASSWORD}
-      DB_NAME: ${MYSQL_DATABASE}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_NAME: ${DB_NAME}
       FLASK_SECRET_KEY: ${FLASK_SECRET_KEY}
     ports:
       - "5000:5000"
     depends_on:
       database:
         condition: service_healthy
-    networks:
-      - frontend
-      - backend
     security_opt:
       - no-new-privileges:true
 
-networks:
-  frontend:
-
-  backend:
-    internal: true
+  adminer:
+    image: adminer
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+    security_opt:
+      - no-new-privileges:true
 
 volumes:
+
   mysql_data:
