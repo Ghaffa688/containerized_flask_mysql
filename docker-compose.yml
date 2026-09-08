@@ -1,24 +1,67 @@
 name: flask-mysql-local
 
 services:
+
+  adminer: 
+    image: adminer
+    ports: 
+      - "8080:8080"
+
   database:
-    image: mysql:8.4
+    build:
+      context: ./mysql
     environment:
       MYSQL_DATABASE: BucketList
       MYSQL_USER: flask_user
-      MYSQL_PASSWORD: devpassword
-      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_PASSWORD_FILE: /run/secrets/db_password
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/db_root_password
+    secrets:
+      - db_password
+      - db_root_password
     volumes:
       - mysql_data:/var/lib/mysql
-            - ./mysql/init:/docker-entrypoint-initdb.d
-
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+    security_opt:
+      - no-new-privileges:true
 
   application:
     build: ./app
+    environment:
+      DB_HOST: database
+      DB_USER: flask_user
+      DB_NAME: BucketList
+      DB_PASSWORD_FILE: /run/secrets/db_password
+    secrets:
+      - db_password
     ports:
       - "5000:5000"
     depends_on:
-      - database
+      database:
+        condition: service_healthy
+    networks:
+      - frontend
+      - backend
+    security_opt:
+      - no-new-privileges:true
+
+networks:
+  frontend:
+  backend:
+    internal: true
+
 
 volumes:
   mysql_data:
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  db_root_password:
+    file: ./secrets/db_root_password.txt
