@@ -3,16 +3,20 @@ from flask import Flask, render_template, json, request, session, redirect
 from flaskext.mysql import MySQL
 from werkzeug.security import generate_password_hash, check_password_hash
 
+mysql = MySQL()
+app = Flask(__name__)
 
-def read_secret(env_name, default=None):
-    """Read a value from ENV, or from a file if ENV_FILE is set (Docker secrets)."""
-    file_path = os.getenv(f"{env_name}_FILE")
-    if file_path and os.path.isfile(file_path):
-        with open(file_path) as f:
-            return f.read().strip()
-    return os.getenv(env_name, default)
+app.config['MYSQL_DATABASE_HOST'] = os.getenv('DB_HOST', 'database')
+app.config['MYSQL_DATABASE_USER'] = os.getenv('DB_USER', 'flask_user')
+app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv('DB_PASSWORD', 'devpassword')
+app.config['MYSQL_DATABASE_DB'] = os.getenv('DB_NAME', 'BucketList')
 
+mysql.init_app(app)
 
+app.secret_key = os.getenv(
+    'FLASK_SECRET_KEY',
+    'dev-only-change-me'
+)
 mysql = MySQL()
 app = Flask(__name__)
 
@@ -25,7 +29,6 @@ mysql.init_app(app)
 
 app.secret_key = os.getenv('FLASK_SECRET_KEY', 'dev-only-change-me')
 
-app.secret_key = read_secret('FLASK_SECRET_KEY', 'dev-only-change-me')
 
 
 @app.route('/')
