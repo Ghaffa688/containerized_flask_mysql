@@ -34,6 +34,7 @@ services:
     ports:
       - "5000:5000"
     environment:
+      PYTHONDONTWRITEBYTECODE: "1"
       MYSQL_HOST: db
       MYSQL_USER_FILE:     /run/secrets/mysql_user
       MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
@@ -49,6 +50,9 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
 
   adminer:
     image: adminer:latest
@@ -63,6 +67,9 @@ services:
       - no-new-privileges:true
     cap_drop:
       - ALL
+    read_only: true
+    tmpfs:
+      - /tmp
 
 secrets:
   mysql_root_password:
