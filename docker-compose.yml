@@ -37,5 +37,15 @@ services:
       db:
         condition: service_healthy
 
+  adminer:
+    image: adminer:latest
+    container_name: flask_adminer
+    restart: always
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
   db_data:
