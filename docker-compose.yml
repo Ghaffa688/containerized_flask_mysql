@@ -6,16 +6,21 @@ services:
     container_name: flask_mysql_db
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: flaskdb
-      MYSQL_USER: flaskuser
-      MYSQL_PASSWORD: flaskpassword
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_PASSWORD_FILE:      /run/secrets/mysql_password
+      MYSQL_USER_FILE:          /run/secrets/mysql_user
+      MYSQL_DATABASE_FILE:      /run/secrets/mysql_database
+    secrets:
+      - mysql_root_password
+      - mysql_password
+      - mysql_user
+      - mysql_database
     ports:
       - "3307:3306"
     volumes:
       - db_data:/var/lib/mysql
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-prootpassword"]
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p$$(cat /run/secrets/mysql_root_password)"]
       interval: 5s
       timeout: 5s
       retries: 15
@@ -30,9 +35,13 @@ services:
       - "5000:5000"
     environment:
       MYSQL_HOST: db
-      MYSQL_USER: flaskuser
-      MYSQL_PASSWORD: flaskpassword
-      MYSQL_DB: flaskdb
+      MYSQL_USER_FILE:     /run/secrets/mysql_user
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+      MYSQL_DB_FILE:       /run/secrets/mysql_database
+    secrets:
+      - mysql_user
+      - mysql_password
+      - mysql_database
     depends_on:
       db:
         condition: service_healthy
@@ -46,6 +55,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+secrets:
+  mysql_root_password:
+    file: ./secrets/mysql_root_password.txt
+  mysql_password:
+    file: ./secrets/mysql_password.txt
+  mysql_user:
+    file: ./secrets/mysql_user.txt
+  mysql_database:
+    file: ./secrets/mysql_database.txt
 
 volumes:
   db_data:

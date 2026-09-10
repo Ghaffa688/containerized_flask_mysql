@@ -7,9 +7,20 @@ from werkzeug.security import generate_password_hash, check_password_hash
 mysql = MySQL()
 app = Flask(__name__)
 
-app.config['MYSQL_USER']     = os.environ.get('MYSQL_USER', 'flaskuser')
-app.config['MYSQL_PASSWORD'] = os.environ.get('MYSQL_PASSWORD', 'flaskpassword')
-app.config['MYSQL_DB']       = os.environ.get('MYSQL_DB', 'flaskdb')
+def read_secret(env_var, fallback):
+    """Read a secret from a file if *_FILE env var is set, else from env, else fallback."""
+    file_path = os.environ.get(env_var)
+    if file_path and os.path.exists(file_path):
+        with open(file_path) as f:
+            return f.read().strip()
+    # env-var fallback (e.g. MYSQL_USER instead of MYSQL_USER_FILE)
+    plain = env_var.replace('_FILE', '')
+    return os.environ.get(plain, fallback)
+
+
+app.config['MYSQL_USER']     = read_secret('MYSQL_USER_FILE',     'flaskuser')
+app.config['MYSQL_PASSWORD'] = read_secret('MYSQL_PASSWORD_FILE', 'flaskpassword')
+app.config['MYSQL_DB']       = read_secret('MYSQL_DB_FILE',       'flaskdb')
 app.config['MYSQL_HOST']     = os.environ.get('MYSQL_HOST', 'db')
 mysql.init_app(app)
 
