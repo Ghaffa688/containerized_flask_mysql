@@ -24,6 +24,17 @@ services:
       interval: 5s
       timeout: 5s
       retries: 15
+    deploy:
+      resources:
+        limits:
+          cpus: "1.00"
+          memory: 1G
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+    command:
+      - --innodb-buffer-pool-size=256M
+      - --max-connections=50
 
   web:
     build:
@@ -53,6 +64,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
 
   adminer:
     image: adminer:latest
@@ -70,6 +89,14 @@ services:
     read_only: true
     tmpfs:
       - /tmp
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
 
 secrets:
   mysql_root_password:
