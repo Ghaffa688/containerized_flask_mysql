@@ -14,8 +14,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the Flask app
-COPY . .
+# Create an unprivileged user and switch to it
+RUN groupadd --system --gid 1001 appgroup \
+    && useradd  --system --uid 1001 --gid appgroup --create-home appuser
+
+# Copy the app and hand ownership to appuser
+COPY --chown=appuser:appgroup . .
+
+USER appuser
 
 EXPOSE 5000
 
