@@ -1,0 +1,5 @@
+# gosu CRITICAL CVE — non-reachable, see SECURITY.md
+# gosu runs once at container startup, calls setgid/setuid/exec,
+# then exits. It never performs TLS, HTTP, URL, XML, MIME, mail,
+# or template processing, so the CVE'd code path is unreachable.
+CVE-2025-68121
