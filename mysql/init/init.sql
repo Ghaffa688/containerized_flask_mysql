@@ -1,5 +1,5 @@
-CREATE DATABASE IF NOT EXISTS BucketList;
-USE BucketList;
+CREATE DATABASE IF NOT EXISTS flaskdb;
+USE flaskdb;
 
 CREATE TABLE IF NOT EXISTS tbl_user (
     user_id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
@@ -18,5 +18,12 @@ CREATE PROCEDURE sp_createUser(
 BEGIN
     INSERT INTO tbl_user (user_name, user_username, user_password)
     VALUES (p_name, p_username, p_password);
+END //
+
+CREATE PROCEDURE sp_validateLogin(
+    IN p_username VARCHAR(45)
+)
+BEGIN
+    SELECT * FROM tbl_user WHERE user_username = p_username;
 END //
 DELIMITER ;
