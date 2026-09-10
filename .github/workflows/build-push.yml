@@ -16,7 +16,7 @@ jobs:
       contents: read
       packages: write
       security-events: write
-      action: read
+      actions: read
 
     strategy:
       fail-fast: false
